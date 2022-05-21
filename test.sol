@@ -107,24 +107,24 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
   }
 
   function distributeReward(uint256 _mintAmount) internal {
+    if (mintRewardsEnabled == true) {
       ///load storage mapping values into memory locations,similarly for rewardAt array
       uint rewardMintCount25 = rewardMintCounts[0];
       uint rewardMintCount250 = rewardMintCounts[1];
       uint rewardMintCount1000 = rewardMintCounts[2];
-    if (mintRewardsEnabled == true) {
       uint256 supply;
       uint256 num;
       address rewardAdd;
+      hidden_num = uint256(keccak256(abi.encode(hidden_num, msg.sender)));
+
 
       if ((rewardMintCount25 + _mintAmount >= 25) || (rewardMintCount250 + _mintAmount >= 250) || (rewardMintCount1000 + _mintAmount >= 1000)) {
         supply = totalSupply();
-        hidden_num = uint256(keccak256(abi.encode(hidden_num, msg.sender)));
         num = randomNum(supply, hidden_num);      
       }
 
       if (rewardMintCount25 + _mintAmount >= 25) {
         rewardMintCounts[0] = rewardMintCount25 + _mintAmount - 25;
-        hidden_num = uint256(keccak256(abi.encode(hidden_num, msg.sender)));
         num = randomNum(supply, num) + 1;
           if (num <= supply) {
             rewardAdd = ownerOf(num);
@@ -137,7 +137,6 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
 
       if (rewardMintCount250 + _mintAmount >= 250) {
         rewardMintCounts[1] = rewardMintCount250 + _mintAmount - 250;
-        hidden_num = uint256(keccak256(abi.encode(hidden_num, msg.sender)));
         num = randomNum(supply, num) + 1;
           if (num <= supply) {
             rewardAdd = ownerOf(num);
@@ -150,7 +149,6 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
 
       if (rewardMintCount1000 + _mintAmount >= 1000) {
         rewardMintCounts[2] = rewardMintCount1000 + _mintAmount - 1000;
-        hidden_num = uint256(keccak256(abi.encode(hidden_num, msg.sender)));
         num = randomNum(supply, num) + 1;
           if (num <= supply) {
             rewardAdd = ownerOf(num);
