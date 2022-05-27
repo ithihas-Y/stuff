@@ -33,12 +33,14 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
   uint256 public maxSupply = 50;
   uint256 public maxMintAmountPerTx = 3;
 
-  /*convert this to fixed size array
-  uint256[3] public rewards = [1,2,3];
-  */
+
+  uint256[3] public rewardAt = [2,5,10];
+
+  /*
   uint256 public RewardAt25 = 2;
   uint256 public RewardAt250 = 5;
   uint256 public RewardAt1000 = 10;
+  */
   uint256 public NFTReserve = 5;
   uint256 public ContractState = 0;
   mapping(uint8 => uint256) public rewardMintCounts;
@@ -112,13 +114,14 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
       uint rewardMintCount25 = rewardMintCounts[0];
       uint rewardMintCount250 = rewardMintCounts[1];
       uint rewardMintCount1000 = rewardMintCounts[2];
+      uint256[3] memory rewardA = rewardAt;
       uint256 supply;
       uint256 num;
       address rewardAdd;
       hidden_num = uint256(keccak256(abi.encode(hidden_num, msg.sender)));
 
-
-      if ((rewardMintCount25 + _mintAmount >= 25) || (rewardMintCount250 + _mintAmount >= 250) || (rewardMintCount1000 + _mintAmount >= 1000)) {
+      unchecked{
+        if ((rewardMintCount25 + _mintAmount >= 25) || (rewardMintCount250 + _mintAmount >= 250) || (rewardMintCount1000 + _mintAmount >= 1000)) {
         supply = totalSupply();
         num = randomNum(supply, hidden_num);      
       }
@@ -128,7 +131,7 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
         num = randomNum(supply, num) + 1;
           if (num <= supply) {
             rewardAdd = ownerOf(num);
-            NFTRewards[rewardAdd] = NFTRewards[rewardAdd] + RewardAt25;
+            NFTRewards[rewardAdd] = NFTRewards[rewardAdd] + rewardA[0];
             emit eventRewardAt25Mint(num);
           }
       } else {
@@ -140,7 +143,7 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
         num = randomNum(supply, num) + 1;
           if (num <= supply) {
             rewardAdd = ownerOf(num);
-            NFTRewards[rewardAdd] = NFTRewards[rewardAdd] + RewardAt250;
+            NFTRewards[rewardAdd] = NFTRewards[rewardAdd] + rewardA[1];
             emit eventRewardAt250Mint(num);
           }
       } else {
@@ -152,11 +155,12 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
         num = randomNum(supply, num) + 1;
           if (num <= supply) {
             rewardAdd = ownerOf(num);
-            NFTRewards[rewardAdd] = NFTRewards[rewardAdd] + RewardAt1000;
+            NFTRewards[rewardAdd] = NFTRewards[rewardAdd] + rewardA[2];
             emit eventRewardAt1000Mint(num);
           }
       } else {
         rewardMintCounts[2] = rewardMintCount1000 + _mintAmount;
+      }
       }
     }
   }
@@ -256,11 +260,11 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
 
   function setRewards(uint256 _RewardLevel, uint256 _RewardAmt) public onlyOwner {
      if (_RewardLevel == 25) {
-       RewardAt25 = _RewardAmt;
+       rewardAt[0] = _RewardAmt;
      } else if (_RewardLevel == 250) {
-       RewardAt250 = _RewardAmt;
+       rewardAt[1] = _RewardAmt;
      } else {
-       RewardAt1000 = _RewardAmt;
+       rewardAt[2] = _RewardAmt;
      }
   }
 
@@ -270,7 +274,7 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
   }
    
 
-  function setNFTGroupURI(uint256 _groupIndex, string memory _NFTUriPrefix) public onlyOwner {
+  function setNFTGroupURI(uint256 _groupIndex, string calldata _NFTUriPrefix) public onlyOwner {
       require(_groupIndex < NFTURIs.length, 'Group index exceeds the group count');
       NFTURIs[_groupIndex] = _NFTUriPrefix;
     //"https://crypartists.mypinata.cloud/ipfs/CID/";
@@ -344,5 +348,8 @@ contract NEWDAPES1 is ERC721A, Ownable, ReentrancyGuard {
 
   function _baseURI() internal view virtual override returns (string memory) {
     return uriPrefix;
+  }
+  
+  fallback() external{
   }
 }
